@@ -6,6 +6,7 @@ const template = Handlebars.compile(source);
 // const context = {title: "My New Post", body: "This is my first post!"};
 
 const context = {
+    /*
     logs: [
         {
             id:         1,
@@ -67,7 +68,9 @@ const context = {
             reportType: "style",
             timestamp:  1554431375
         }
-    ]
+    ]*/
+
+    logs: logList,
 };
 
 

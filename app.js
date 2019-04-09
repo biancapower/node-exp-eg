@@ -6,6 +6,8 @@ const path = require('path');
 
 const app = express();
 
+const Queue = require('./queue');
+
  // process.env.PORT lets the port be set by Heroku
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
@@ -25,36 +27,12 @@ app.use(bodyParser.urlencoded({extended: false}));
         // using this with path.join is safer than the option that doesn't
 app.use(express.static(path.join(__dirname, 'public')));
 
-let people = [
-    {
-        name: "Bob",
-        age: 50,
-    },
-    {
-        name: "Jane",
-        age: 45,
-    },
-    {
-        name: "T",
-        age: 30,
-    },
-]
+app.get('/data.js', (req, res) => {
+    const object = [{id:1}, {id: 5}];
 
-app.get('/', (req, res) => {
-    res.send('hello world');
+    res.send(`var logList = ${JSON.stringify(object)};`);
 });
 
-app.get('/goodbye', (req, res) => {
-    res.send('goodbye world');
-});
-
-app.get('/people', (req, res) => {
-    res.header('Content-Security-Policy', "img-src \'self\'; report-uri /report")
-    res.send("Some sample text!! <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Flowchart_showing_Simple_and_Preflight_XHR.svg/768px-Flowchart_showing_Simple_and_Preflight_XHR.svg.png' alt='mixed'>" +
-
-
-    "<img src='http://telstra.com.au/myimg.png'>");
-});
 
 let unique = 1;
 
@@ -83,17 +61,39 @@ function createLog(report) {
     return newLog;
 
 }
+
+// A cache storing the most recent 1000 events
+const logCache = new Queue();
+
+// adds a log object to the queue, oldest logs are removed and saved to file
+// after queue size exceeds 1000
+function queueLog(log) {
+
+    logCache.add(log);
+    while (logCache.length() > 1000) {
+        const oldestLog = logCache.remove();
+        console.error('Saving old logs to a file not implemented yet!!');
+    }
+
+}
+
 // route
 // handles post requests to any url
 app.post('/*', (req, res) => {
-    console.log(req.body);
 
-    // handle the report in some way
+    // this is sent by the browser formatted as a standard CSP report
+    // see https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP#Violation_report_syntax
+    // you can also violate CSP in your browser and watch the network dev tools
+
+    // OR ... console.log(req.body);
+
     const report = req.body["csp-report"];
 
-    createLog? sort of probably
+    const log = createLog(report);
+
+    queueLog(log);
+
 
     res.end();
-    //res.send('hello world');
 });
 

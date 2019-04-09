@@ -9,6 +9,7 @@
  *             and returns it
  *             - if there are no items in the queue,
  *               return undefined
+ *   toArray() returns an array of the items starting with the first
  *   length()  returns current list length
  */
 
@@ -69,6 +70,19 @@ class Queue {
         this.qLength--;
 
         return firstItem.value;
+    }
+
+    toArray() {
+
+        const result = [];
+
+        let thisItem = this.first;
+        while (thisItem !== null) {
+            result.push(thisItem.value);
+            thisItem = thisItem.after;
+        }
+        
+        return result;
     }
 
     length() {

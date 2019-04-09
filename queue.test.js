@@ -130,3 +130,67 @@ describe("remove items in FIFO order", () => {
     });
 
 });
+
+describe("toArray()", () => {
+    
+    
+    test("list empty", () => {
+        const q = new Queue();
+        expect(q.toArray()).toEqual([]);
+
+        q.add('something');
+        q.remove();
+
+        expect(q.toArray()).toEqual([]);
+    });
+
+    test("one item", () => {
+        const q = new Queue();
+        q.add('xyz');
+
+        expect(q.toArray()).toEqual(['xyz']);
+        q.add('abc');
+        q.remove();
+
+        expect(q.toArray()).toEqual(['abc']);
+
+    });
+
+    test("two itmems", () => {
+        const q = new Queue();
+        q.add('abc');
+        q.add('xyz');
+
+        expect(q.toArray()).toEqual(['abc', 'xyz']);
+        q.remove();
+
+        q.add('pqr');
+
+        expect(q.toArray()).toEqual(['xyz', 'pqr']);
+
+    });
+
+    test("lots of itmems", () => {
+        const q = new Queue();
+        q.add('A');
+        q.add('A');
+        q.add('A');
+        q.add('A');
+        q.add('A');
+        q.add('A');
+        q.add('B');
+
+
+        expect(q.toArray()).toEqual(['A','A','A','A','A','A','B']);
+        q.remove();
+        expect(q.toArray()).toEqual(['A','A','A','A','A','B']);
+        q.remove();
+
+        expect(q.toArray()).toEqual(['A','A','A','A','B']);
+
+        q.add('pqr');
+        expect(q.toArray()).toEqual(['A','A','A','A','B', 'pqr']);
+
+
+    });
+});

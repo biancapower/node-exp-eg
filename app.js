@@ -4,27 +4,53 @@ const bodyParser = require('body-parser');
     // core module, so doesn't need to be npm installed
 const path = require('path');
 
+const winston = require('winston');
 const app = express();
 
 const fs = require('fs');
 
 const Queue = require('./queue');
 
-const LOG_FILE_NAME = "log1.log";
+const levels = {
+    HIGH: 0,
+    MODERATE: 1,
+    UNKNOWN: 2,
+};
+
+const myFormat = winston.format.printf((log) => {
+    return `${log.severity}: ${JSON.stringify(log, null, 4)}\n--------------\n`;
+});
+
+const logger = winston.createLogger({
+  level: 'UNKNOWN',
+  levels: levels,
+  format: winston.format.json(),
+  defaultMeta: { service: 'user-service' },
+  transports: [
+    //
+    // - Write to all logs with level `info` and below to `combined.log`
+    // - Write all logs error (and below) to `error.log`.
+    //
+    new winston.transports.File({
+                filename: 'reports.log',
+                maxsize: 10000,
+                format: myFormat,
+            }),
+    new winston.transports.Console({
+                format: myFormat,
+            }),
+  ]
+});
 
 
 // process.env.PORT lets the port be set by Heroku
 const port = process.env.PORT || 3000;
 
+app.listen(port, () => {
+    console.log(`Server running on ${port}`);
+});
 
-// FIXME this assumes it opens before the server finishes starting up
-const logWriteStream = fs.createWriteStream(LOG_FILE_NAME, { flags: 'a', });
 
-logWriteStream.on('open', () => {
-    app.listen(port, () => {
-        console.log(`Server running on ${port}`);
-    });
-})
 
 
 /* BODY PARSER MIDDLEWARE */
@@ -57,11 +83,11 @@ function createLog(report) {
 
     //id, date, severity
 
-    let severity = 'unknown';
+    let severity = 'UNKNOWN';
     if (violatedDirective == 'style-src') {
-        severity = "moderate";
+        severity = "MODERATE";
     } else if (violatedDirective == 'script-src') {
-        severity = "high";
+        severity = "HIGH";
     }
 
     const newLog = {
@@ -83,11 +109,9 @@ const logCache = new Queue();
 function queueLog(log) {
 
     logCache.add(log);
-    while (logCache.length() > 1000) {
+    while (logCache.length() > 50) {
         const oldestLog = logCache.remove();
-        //console.error('Saving old logs to a file not implemented yet!!');
-        logWriteStream.write(`LOG ENTRY: ${JSON.stringify(oldestLog, null, 4)}\n--------------\n`);
-
+        logger.log(oldestLog.severity, oldestLog);
     }
 
 }
@@ -97,15 +121,13 @@ process.on('SIGINT', () => {
     console.log('Received SIGINT. Flushing logs to log file.');
     while (logCache.length() > 0) {
         const oldestLog = logCache.remove();
-        //console.error('Saving old logs to a file not implemented yet!!');
-        logWriteStream.write(`LOG ENTRY: ${JSON.stringify(oldestLog, null, 4)}\n--------------\n`);
-
+        logger.log(oldestLog.severity, oldestLog);
     }
-    logWriteStream.end();
-    logWriteStream.on('finish', () => {
+    logger.end();
+    logger.on('finish', () => {
         console.log('Exiting.');
         process.exit(0);
-    })
+    });
 
 });
 

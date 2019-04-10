@@ -38,19 +38,41 @@ addArrayToBtree(0, logList.length - 1);
 
 function timeRange() {
     const fromDate = new Date();
-    let [hours, minutes, seconds] = document.getElementById('fromtime').value.split(':');
+    const fromTimeField = document.getElementById('fromtime').value;
+    const toTimeField = document.getElementById('totime').value;
+    console.log (fromTimeField.split(':').length,
+          toTimeField.split(':').length);
 
-    fromDate.setHours(hours, minutes, seconds, 0);
-    const fromTimestamp = fromDate.getTime() / 1000;
+    // only if we have proper times
+    if (fromTimeField.split(':').length == 3 &&
+          toTimeField.split(':').length == 3) {
+
+        let [hours, minutes, seconds] = document.getElementById('fromtime').value.split(':');
+
+        fromDate.setHours(hours, minutes, seconds, 0);
+        const fromTimestamp = fromDate.getTime() / 1000;
 
 
-    const toDate = new Date();
-    [hours, minutes, seconds] = document.getElementById('totime').value.split(':');
-    toDate.setHours(hours, minutes, seconds, 0);
+        const toDate = new Date();
+        [hours, minutes, seconds] = document.getElementById('totime').value.split(':');
+        toDate.setHours(hours, minutes, seconds, 999);
 
-    const toTimestamp = toDate.getTime() / 1000;
-    console.log(toTimestamp);
+        const toTimestamp = toDate.getTime() / 1000;
 
+        filterByRangeQuery(fromTimestamp, toTimestamp);
+    }
+
+}
+
+// restricts items in table to those matching the range specified
+function filterByRangeQuery(from, to) {
+    const results = bTree.range(from, to);
+
+    const context = {
+        logs: results,
+    };
+
+    document.getElementById("display").innerHTML = template(context);
 }
 
 

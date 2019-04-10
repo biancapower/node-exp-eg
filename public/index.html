@@ -24,19 +24,32 @@
                 <td>{{id}}</td>
                 <td>{{severity}}</td> 
                 <td>{{reportType}}</td>
-                <td>{{timestamp}}</td>
+                <td>{{datetime}}</td>
             </tr>
             {{/each}}
         </table>
 
     </script>
-    <div id="display">
+    <div>
         <h1>HEY HEY</h1>
+        Display logs in range:
+        <input id="fromdate" type="date">
+        <input id="fromtime" type="time" step="1" onchange="timeRange()">
+        ---
+        <input id="todate" type="date">
+        <input id="totime" type="time" step="1" onchange="timeRange()">
+        <br><br><br>
+    </div>
+
+    <div id="display">
+
+
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.12/handlebars.min.js"
         type="text/javascript"></script>
     <script src="data.js"></script>
+    <script src="bst.js"></script>
     <script src="index.js"></script>
 </body>
 

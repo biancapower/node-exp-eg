@@ -68,7 +68,7 @@ function createLog(report) {
         id:         id,
         severity:   severity,
         reportType: violatedDirective,
-        timestamp:  Math.floor(new Date().getTime() / 1000)
+        timestamp:  new Date().getTime() / 1000,
     };
 
     return newLog;

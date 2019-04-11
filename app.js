@@ -8,6 +8,7 @@ const winston = require('winston');
 const app = express();
 
 const fs = require('fs');
+const checkFilesize = require('./check-filesize-process');
 
 const Queue = require('./queue');
 
@@ -140,6 +141,8 @@ app.post('/*', (req, res) => {
     // you can also violate CSP in your browser and watch the network dev tools
 
     // OR ... console.log(req.body);
+
+    checkFilesize();
 
     const report = req.body["csp-report"];
 

@@ -2,9 +2,7 @@
 const source   = document.getElementById("entry-template").innerHTML;
 const template = Handlebars.compile(source);
 
-const context = {
-    logs: logList,
-};
+
 
 for (let i = 0; i < logList.length; i++) {
     const datetime = new Date(logList[i].timestamp * 1000).toLocaleString();
@@ -36,13 +34,14 @@ function addArrayToBtree(firstIndex, lastIndex) {
 addArrayToBtree(0, logList.length - 1);
 
 
-function timeRange() {
+function refilter() {
     const fromDate = new Date();
     const fromTimeField = document.getElementById('fromtime').value;
     const toTimeField = document.getElementById('totime').value;
     console.log (fromTimeField.split(':').length,
           toTimeField.split(':').length);
 
+    let toDisplay = logList;
     // only if we have proper times
     if (fromTimeField.split(':').length == 3 &&
           toTimeField.split(':').length == 3) {
@@ -59,21 +58,57 @@ function timeRange() {
 
         const toTimestamp = toDate.getTime() / 1000;
 
-        filterByRangeQuery(fromTimestamp, toTimestamp);
+        toDisplay = bTree.range(fromTimestamp, toTimestamp);
     }
 
-}
+    // get contents of search input box
+    const searchString = document.getElementById('search-string').value;
 
-// restricts items in table to those matching the range specified
-function filterByRangeQuery(from, to) {
-    const results = bTree.range(from, to);
+
+    toDisplay = toDisplay.filter(function(item) {
+
+        // search for string
+        if (item.reportType.indexOf(searchString) != -1) {
+            return true;
+        } else {
+            return false;
+        }
+
+        //return item.reportType.indexOf(searchString) != -1 ;
+    });
+
+    toDisplay = toDisplay.slice();
+    toDisplay.sort(function(itemA, itemB) { //comparator function
+        // return a number < 0 if itemA < itemB (comes before)
+        // return a number > 0 if itemA > itemB (comes after)
+        // return 0 if don't care
+        const severityA = ['UNKNOWN', 'MEDIUM', 'HIGH'].indexOf(itemA.severity);
+        const severityB = ['UNKNOWN', 'MEDIUM', 'HIGH'].indexOf(itemB.severity);
+
+        if (severityA > severityB) {
+            return -1;
+        } else if (severityA < severityB) {
+            return 1;
+        } else {
+            if (itemA.timestamp < itemB.timestamp) {
+                return -1;
+            } else if (itemA.timestamp > itemB.timestamp) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+
+    });
+
+
 
     const context = {
-        logs: results,
+        logs: toDisplay,
     };
 
     document.getElementById("display").innerHTML = template(context);
+
 }
 
-
-document.getElementById("display").innerHTML = template(context);
+refilter();

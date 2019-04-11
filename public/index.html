@@ -34,11 +34,13 @@
         <h1>HEY HEY</h1>
         Display logs in range:
         <input id="fromdate" type="date">
-        <input id="fromtime" type="time" step="1" onchange="timeRange()">
+        <input id="fromtime" type="time" step="1" onchange="refilter()">
         ---
         <input id="todate" type="date">
-        <input id="totime" type="time" step="1" onchange="timeRange()">
-        <br><br><br>
+        <input id="totime" type="time" step="1" onchange="refilter()">
+        <br><br>
+        <input id="search-string" type="text" onchange="refilter()">
+        <br>
     </div>
 
     <div id="display">

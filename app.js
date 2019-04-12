@@ -110,7 +110,7 @@ const logCache = new Queue();
 function queueLog(log) {
 
     logCache.add(log);
-    while (logCache.length() > 50) {
+    while (logCache.length() > 1000) {
         const oldestLog = logCache.remove();
         logger.log(oldestLog.severity, oldestLog);
     }
